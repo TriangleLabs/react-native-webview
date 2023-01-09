@@ -1277,6 +1277,7 @@ static WKContentRuleList * _contentRuleList;
       [event addEntriesFromDictionary: @{
         @"url": (request.URL).absoluteString,
         @"navigationType": navigationTypes[@(navigationType)]
+        @"hello": @"world"
       }];
       _onLoadingStart(event);
     }
