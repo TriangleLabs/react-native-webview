@@ -1276,7 +1276,7 @@ static WKContentRuleList * _contentRuleList;
       NSMutableDictionary<NSString *, id> *event = [self baseEventWithHistory];
       [event addEntriesFromDictionary: @{
         @"url": (request.URL).absoluteString,
-        @"navigationType": navigationTypes[@(navigationType)]
+        @"navigationType": navigationTypes[@(navigationType)],
         @"hello": @"world"
       }];
       _onLoadingStart(event);
