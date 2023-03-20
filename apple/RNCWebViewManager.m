@@ -10,6 +10,7 @@
 #import <React/RCTUIManager.h>
 #import <React/RCTDefines.h>
 #import "RNCWebView.h"
+#import "HourglassWebView.h"
 
 @interface RNCWebViewManager () <RNCWebViewDelegate>
 @end
@@ -48,7 +49,7 @@ RCT_EXPORT_MODULE()
 - (RCTUIView *)view
 #endif // !TARGET_OS_OSX
 {
-  RNCWebView *webView = [RNCWebView new];
+  RNCWebView *webView = [HourglassWebView new];
   webView.delegate = self;
   return webView;
 }

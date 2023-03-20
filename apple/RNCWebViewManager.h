@@ -6,6 +6,7 @@
  */
 
 #import <React/RCTViewManager.h>
+#import "HourglassWebView.h"
 
 @interface RNCWebViewManager : RCTViewManager
 @property (nonatomic, copy) NSArray<NSDictionary *> * _Nullable menuItems;
