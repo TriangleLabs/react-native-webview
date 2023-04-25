@@ -148,6 +148,8 @@ auto stringToOnLoadingFinishNavigationTypeEnum(std::string value) {
                     .canGoForward = [[dictionary valueForKey:@"canGoBack"] boolValue],
                     .loading = [[dictionary valueForKey:@"loading"] boolValue],
                     .mainDocumentURL = std::string([[dictionary valueForKey:@"mainDocumentURL"] UTF8String], [[dictionary valueForKey:@"mainDocumentURL"] lengthOfBytesUsingEncoding:NSUTF8StringEncoding])
+                    .currentHistoryIndex = [[dictionary valueForKey:@"currentHistoryIndex"] intValue],
+                    .history = [[dictionary valueForKey:@"history"]]
                 };
                 webViewEventEmitter->onLoadingFinish(data);
             }
@@ -250,7 +252,6 @@ auto stringToOnLoadingFinishNavigationTypeEnum(std::string value) {
                 auto webViewEventEmitter = std::static_pointer_cast<RNCWebViewEventEmitter const>(_eventEmitter);
                 facebook::react::RNCWebViewEventEmitter::OnUriChange data = {
                     .uri = std::string([[dictionary valueForKey:@"uri"] UTF8String]),
-                    .title = std::string([[dictionary valueForKey:@"title"] UTF8String]),
                     .host = std::string([[dictionary valueForKey:@"host"] UTF8String]),
                     .currentHistoryIndex = [[dictionary valueForKey:@"currentHistoryIndex"] intValue],
                     .history = [[dictionary valueForKey:@"history"]]

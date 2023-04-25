@@ -80,6 +80,25 @@ export type WebViewNavigationEvent = Readonly<{
   mainDocumentURL?: string;
 }>;
 
+export type WebViewNavigationEventWithHistory = Readonly<{
+  url: string;
+  loading: boolean;
+  title: string;
+  canGoBack: boolean;
+  canGoForward: boolean;
+  lockIdentifier: Double;
+  navigationType:
+    | 'click'
+    | 'formsubmit'
+    | 'backforward'
+    | 'reload'
+    | 'formresubmit'
+    | 'other';
+  mainDocumentURL?: string;
+  currentHistoryIndex: number;
+  history: { uri: string; host: string; title: string }[];
+}>;
+
 export type ShouldStartLoadRequestEvent = Readonly<{
   url: string;
   loading: boolean;
@@ -260,7 +279,7 @@ export interface NativeProps extends ViewProps {
   mediaPlaybackRequiresUserAction?: boolean;
   messagingEnabled: boolean;
   onLoadingError: DirectEventHandler<WebViewErrorEvent>;
-  onLoadingFinish: DirectEventHandler<WebViewNavigationEvent>;
+  onLoadingFinish: DirectEventHandler<WebViewNavigationEventWithHistory>;
   onLoadingProgress: DirectEventHandler<WebViewNativeProgressEvent>;
   onLoadingStart: DirectEventHandler<WebViewNavigationEvent>;
   onHttpError: DirectEventHandler<WebViewHttpErrorEvent>;

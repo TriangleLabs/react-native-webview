@@ -490,11 +490,11 @@ RCTAutoInsetsProtocol>
     [_webView addObserver:self forKeyPath:@"estimatedProgress" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
     
     /* Hourglass Custom Start */
-      [_webView addObserver:self forKeyPath:@"URL" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
-      [_webView addObserver:self forKeyPath:@"canGoBack" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
-      [_webView addObserver:self forKeyPath:@"canGoForward" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
-      [_webView addObserver:self forKeyPath:@"themeColor" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
-      [_webView addObserver:self forKeyPath:@"underPageBackgroundColor" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
+    [_webView addObserver:self forKeyPath:@"URL" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
+    [_webView addObserver:self forKeyPath:@"canGoBack" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
+    [_webView addObserver:self forKeyPath:@"canGoForward" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
+    [_webView addObserver:self forKeyPath:@"themeColor" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
+    [_webView addObserver:self forKeyPath:@"underPageBackgroundColor" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
     /* Hourglass Custom End */
       
     _webView.allowsBackForwardNavigationGestures = _allowsBackForwardNavigationGestures;
@@ -550,11 +550,11 @@ RCTAutoInsetsProtocol>
     [_webView removeObserver:self forKeyPath:@"estimatedProgress"];
     
     /* Hourglass Custom Start */
-      [_webView removeObserver:self forKeyPath:@"URL"];
-      [_webView removeObserver:self forKeyPath:@"canGoBack"];
-      [_webView removeObserver:self forKeyPath:@"canGoForward"];
-      [_webView removeObserver:self forKeyPath:@"themeColor"];
-      [_webView removeObserver:self forKeyPath:@"underPageBackgroundColor"];
+    [_webView removeObserver:self forKeyPath:@"URL"];
+    [_webView removeObserver:self forKeyPath:@"canGoBack"];
+    [_webView removeObserver:self forKeyPath:@"canGoForward"];
+    [_webView removeObserver:self forKeyPath:@"themeColor"];
+    [_webView removeObserver:self forKeyPath:@"underPageBackgroundColor"];
     /* Hourglass Custom End*/
       
     [_webView removeFromSuperview];
@@ -631,6 +631,43 @@ RCTAutoInsetsProtocol>
 }
 #endif // !TARGET_OS_OSX
 
+/* Hourglass Custom Start */
+- (NSDictionary *)getHistory:(WKWebView *)webView {
+    WKBackForwardList *backForwardList = webView.backForwardList;
+    NSMutableArray<NSDictionary<NSString *, id> *> *history = [NSMutableArray array];
+
+    for (WKBackForwardListItem *item in backForwardList.backList) {
+        NSMutableDictionary<NSString *, id> *entry = [NSMutableDictionary dictionary];
+        entry[@"uri"] = item.URL.absoluteString;
+        entry[@"title"] = [item.title isEqual: @""] ? [item.URL.host stringByReplacingOccurrencesOfString:@"www." withString:@""] : item.title;
+        entry[@"host"] = item.URL.host;
+        [history addObject:entry];
+    }
+    // Add the current URL to the front of the array
+    NSMutableDictionary<NSString *, id> *entry = [NSMutableDictionary dictionary];
+    entry[@"uri"] = webView.URL.absoluteString;
+    entry[@"title"] = webView.loading ? [webView.URL.host stringByReplacingOccurrencesOfString:@"www." withString:@""] : ([webView.title isEqual: @""] ? [webView.URL.host stringByReplacingOccurrencesOfString:@"www." withString:@""] : webView.title);
+    entry[@"host"] = webView.URL.host;
+    [history addObject:entry];
+    // Add the URLs in the forward list to the end of the array
+    for (WKBackForwardListItem *item in backForwardList.forwardList) {
+        NSMutableDictionary<NSString *, id> *entry = [NSMutableDictionary dictionary];
+        entry[@"uri"] = item.URL.absoluteString;
+        entry[@"title"] = [item.title isEqual: @""] ? [item.URL.host stringByReplacingOccurrencesOfString:@"www." withString:@""] : item.title;
+        entry[@"host"] = item.URL.host;
+        [history addObject:entry];
+    }
+
+    NSNumber *currentHistoryIndex = @(backForwardList.backList.count);
+
+    return @{
+        @"history": history,
+        @"currentHistoryIndex": currentHistoryIndex
+    };
+}
+
+/* Hourglass Custom End */
+
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
   if ([keyPath isEqual:@"estimatedProgress"] && object == self.webView) {
     if(_onLoadingProgress) {
@@ -643,37 +680,15 @@ RCTAutoInsetsProtocol>
   else if ([keyPath isEqualToString:@"URL"] && object == self.webView) {
       NSURL *newURL = (NSURL *)change[NSKeyValueChangeNewKey];
       if (_onUriChange) {
-          WKBackForwardList *backForwardList = _webView.backForwardList;
-          NSMutableArray<NSDictionary<NSString *, id> *> *history = [NSMutableArray array];
-
-          for (WKBackForwardListItem *item in backForwardList.backList) {
-              NSMutableDictionary<NSString *, id> *entry = [NSMutableDictionary dictionary];
-              entry[@"uri"] = item.URL.absoluteString;
-              entry[@"title"] = item.title;
-              entry[@"host"] = item.URL.host;
-              [history addObject:entry];
-          }
-          // Add the current URL to the front of the array
-          NSMutableDictionary<NSString *, id> *entry = [NSMutableDictionary dictionary];
-          entry[@"uri"] = [newURL absoluteString];
-          entry[@"title"] = _webView.title;
-          entry[@"host"] = [newURL host];
-          [history addObject:entry];
-          // Add the URLs in the forward list to the end of the array
-          for (WKBackForwardListItem *item in backForwardList.forwardList) {
-              NSMutableDictionary<NSString *, id> *entry = [NSMutableDictionary dictionary];
-              entry[@"uri"] = item.URL.absoluteString;
-              entry[@"title"] = item.title;
-              entry[@"host"] = item.URL.host;
-              [history addObject:entry];
-          }
+          NSDictionary *historyInfo = [self getHistory:_webView];
+          NSArray *history = historyInfo[@"history"];
+          NSNumber *currentHistoryIndex = historyInfo[@"currentHistoryIndex"];
           
         _onUriChange(@{
           @"uri": [newURL absoluteString],
-          @"title": _webView.title,
           @"host": [newURL host],
           @"history": history,
-          @"currentHistoryIndex": @(backForwardList.backList.count)
+          @"currentHistoryIndex": currentHistoryIndex
         });
       }   
   }
@@ -800,6 +815,11 @@ RCTAutoInsetsProtocol>
     if (_onLoadingFinish) {
       NSMutableDictionary<NSString *, id> *event = [self baseEvent];
       [event addEntriesFromDictionary: @{@"navigationType": message.body}];
+    
+      NSDictionary *historyInfo = [self getHistory:_webView];
+      event[@"history"] = historyInfo[@"history"];
+      event[@"currentHistoryIndex"] = historyInfo[@"currentHistoryIndex"];
+
       _onLoadingFinish(event);
     }
   } else if ([message.name isEqualToString:MessageHandlerName]) {

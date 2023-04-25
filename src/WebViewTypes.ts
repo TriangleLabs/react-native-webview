@@ -72,12 +72,12 @@ declare const NativeWebViewWindowsBase: Constructor<NativeMethods> &
 export class NativeWebViewWindows extends NativeWebViewWindowsBase {}
 
 /* Hourglass Custom Start */
+
 export type UriChangeEvent = NativeSyntheticEvent<{
   uri: string;
   host: string;
-  title: string;
   currentHistoryIndex: number;
-  history: { uri: string; host: string; title: string }[];
+  history: { uri: string; host: string }[];
 }>;
 
 export type BackgroundChangeEvent = NativeSyntheticEvent<{
@@ -116,6 +116,15 @@ export interface WebViewNavigation extends WebViewNativeEvent {
     | 'other';
   mainDocumentURL?: string;
 }
+
+/* Hourglass Custom Start */
+export interface WebViewNavigationWithHistory extends WebViewNavigation {
+  currentHistoryIndex: number;
+  history: { uri: string; host: string; title: string }[];
+}
+export type WebViewNavigationEventWithHistory =
+  NativeSyntheticEvent<WebViewNavigationWithHistory>;
+/* Hourglass Custom End */
 
 export interface ShouldStartLoadRequest extends WebViewNavigation {
   isTopFrame: boolean;
@@ -360,6 +369,18 @@ export interface WindowsWebViewProps extends WebViewSharedProps {
 }
 
 export interface IOSWebViewProps extends WebViewSharedProps {
+  /* Hourglass Custom Start */
+  onUriChange?: (event: UriChangeEvent) => void;
+  onCanGoBackChange?: (
+    event: NativeSyntheticEvent<{ canGoBack: boolean }>,
+  ) => void;
+  onCanGoForwardChange?: (
+    event: NativeSyntheticEvent<{ canGoForward: boolean }>,
+  ) => void;
+  onBackgroundChange?: (event: BackgroundChangeEvent) => void;
+  onNewWindow?: (event: NativeSyntheticEvent<{ uri: string }>) => void;
+  /* Hourglass Custom End */
+
   /**
    * Does not store any data within the lifetime of the WebView.
    */
@@ -1062,18 +1083,6 @@ export interface AndroidWebViewProps extends WebViewSharedProps {
 }
 
 export interface WebViewSharedProps extends ViewProps {
-  /* Hourglass Custom Start */
-  onUriChange?: (event: UriChangeEvent) => void;
-  onCanGoBackChange?: (
-    event: NativeSyntheticEvent<{ canGoBack: boolean }>,
-  ) => void;
-  onCanGoForwardChange?: (
-    event: NativeSyntheticEvent<{ canGoForward: boolean }>,
-  ) => void;
-  onBackgroundChange?: (event: BackgroundChangeEvent) => void;
-  onNewWindow?: (event: NativeSyntheticEvent<{ uri: string }>) => void;
-  /* Hourglass Custom End */
-
   /**
    * Loads static html or a uri (with optional headers) in the WebView.
    */
@@ -1124,7 +1133,9 @@ export interface WebViewSharedProps extends ViewProps {
   /**
    * Function that is invoked when the `WebView` load succeeds or fails.
    */
-  onLoadEnd?: (event: WebViewNavigationEvent | WebViewErrorEvent) => void;
+  onLoadEnd?: (
+    event: WebViewNavigationEventWithHistory | WebViewErrorEvent,
+  ) => void;
 
   /**
    * Function that is invoked when the `WebView` starts loading.
