@@ -74,7 +74,7 @@ export class NativeWebViewWindows extends NativeWebViewWindowsBase {}
 /* Hourglass Custom Start */
 export type UriChangeEvent = NativeSyntheticEvent<{
   uri: string;
-  hostname: string;
+  host: string;
   title: string;
   currentHistoryIndex: number;
   history: { uri: string; hostname: string; title: string }[];
@@ -1071,6 +1071,7 @@ export interface WebViewSharedProps extends ViewProps {
     event: NativeSyntheticEvent<{ canGoForward: boolean }>,
   ) => void;
   onBackgroundChange?: (event: BackgroundChangeEvent) => void;
+  onNewWindow?: (event: NativeSyntheticEvent<{ uri: string }>) => void;
   /* Hourglass Custom End */
 
   /**

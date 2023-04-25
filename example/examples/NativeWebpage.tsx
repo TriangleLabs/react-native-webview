@@ -11,9 +11,9 @@ export default class NativeWebpage extends Component<Props, State> {
 
   render() {
     return (
-      <View style={{ height: 400 }}>
+      <View style={{ height: 800 }}>
         <WebView
-          source={{ uri: 'https://d3ward.github.io/toolz/adblock.html' }}
+          source={{ uri: 'https://pogcoin.gg' }}
           style={{ width: '100%', height: '100%' }}
           onShouldStartLoadWithRequest={(event) => {
             // console.log('onShouldStartLoadWithRequest', event);
@@ -28,6 +28,7 @@ export default class NativeWebpage extends Component<Props, State> {
             console.log('onCanGoForward: ', e.nativeEvent)
           }
           onBackgroundChange={(e) => console.log('background: ', e.nativeEvent)}
+          onNewWindow={(e) => console.log('new window: ', e.nativeEvent)}
         />
       </View>
     );

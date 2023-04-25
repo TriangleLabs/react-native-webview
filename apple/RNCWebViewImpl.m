@@ -306,7 +306,11 @@ RCTAutoInsetsProtocol>
 - (WKWebView *)webView:(WKWebView *)webView createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration forNavigationAction:(WKNavigationAction *)navigationAction windowFeatures:(WKWindowFeatures *)windowFeatures
 {
   if (!navigationAction.targetFrame.isMainFrame) {
-    [webView loadRequest:navigationAction.request];
+      [webView stopLoading];
+      
+      _onNewWindow(@{
+        @"uri": navigationAction.request.URL.absoluteString,
+      });
   }
   return nil;
 }
@@ -646,28 +650,28 @@ RCTAutoInsetsProtocol>
               NSMutableDictionary<NSString *, id> *entry = [NSMutableDictionary dictionary];
               entry[@"uri"] = item.URL.absoluteString;
               entry[@"title"] = item.title;
-              entry[@"hostname"] = item.URL.host;
+              entry[@"host"] = item.URL.host;
               [history addObject:entry];
           }
           // Add the current URL to the front of the array
           NSMutableDictionary<NSString *, id> *entry = [NSMutableDictionary dictionary];
           entry[@"uri"] = [newURL absoluteString];
           entry[@"title"] = _webView.title;
-          entry[@"hostname"] = [newURL host];
+          entry[@"host"] = [newURL host];
           [history addObject:entry];
           // Add the URLs in the forward list to the end of the array
           for (WKBackForwardListItem *item in backForwardList.forwardList) {
               NSMutableDictionary<NSString *, id> *entry = [NSMutableDictionary dictionary];
               entry[@"uri"] = item.URL.absoluteString;
               entry[@"title"] = item.title;
-              entry[@"hostname"] = item.URL.host;
+              entry[@"host"] = item.URL.host;
               [history addObject:entry];
           }
           
         _onUriChange(@{
           @"uri": [newURL absoluteString],
           @"title": _webView.title,
-          @"hostname": [newURL host],
+          @"host": [newURL host],
           @"history": history,
           @"currentHistoryIndex": @(backForwardList.backList.count)
         });
@@ -681,7 +685,7 @@ RCTAutoInsetsProtocol>
   }
   else if ([keyPath isEqualToString:@"canGoForward"] && object == self.webView) {
       BOOL canGoForward = [change[NSKeyValueChangeNewKey] boolValue];
-      if (canGoForward) {
+      if (_onCanGoForwardChange) {
         _onCanGoForwardChange(@{@"canGoForward": @(canGoForward)});
       }
   }
@@ -1099,6 +1103,9 @@ RCTAutoInsetsProtocol>
 {
   NSDictionary *event = @{
     @"url": _webView.URL.absoluteString ?: @"",
+    /* Hourglass Custom Start */
+    @"host": _webView.URL.host ?: @"",
+    /* Hourglass Custom End */
     @"title": _webView.title ?: @"",
     @"loading" : @(_webView.loading),
     @"canGoBack": @(_webView.canGoBack),

@@ -55,6 +55,7 @@ RCT_EXPORT_VIEW_PROPERTY(onUriChange, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onCanGoBackChange, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onCanGoForwardChange, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onBackgroundChange, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onNewWindow, RCTDirectEventBlock)
 /* Hourglass Custom End */
 
 // New arch only

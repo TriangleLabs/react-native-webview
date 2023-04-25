@@ -71,6 +71,7 @@ auto stringToOnLoadingFinishNavigationTypeEnum(std::string value) {
                 auto webViewEventEmitter = std::static_pointer_cast<RNCWebViewEventEmitter const>(_eventEmitter);
                 facebook::react::RNCWebViewEventEmitter::OnShouldStartLoadWithRequest data = {
                     .url = std::string([[dictionary valueForKey:@"url"] UTF8String]),
+                    .host = std::string([[dictionary valueForKey:@"host"] UTF8String]),
                     .lockIdentifier = [[dictionary valueForKey:@"lockIdentifier"] doubleValue],
                     .title = std::string([[dictionary valueForKey:@"title"] UTF8String]),
                     .navigationType = stringToOnShouldStartLoadWithRequestNavigationTypeEnum(std::string([[dictionary valueForKey:@"navigationType"] UTF8String])),
@@ -88,6 +89,7 @@ auto stringToOnLoadingFinishNavigationTypeEnum(std::string value) {
                 auto webViewEventEmitter = std::static_pointer_cast<RNCWebViewEventEmitter const>(_eventEmitter);
                 facebook::react::RNCWebViewEventEmitter::OnLoadingStart data = {
                     .url = std::string([[dictionary valueForKey:@"url"] UTF8String]),
+                    .host = std::string([[dictionary valueForKey:@"host"] UTF8String]),
                     .lockIdentifier = [[dictionary valueForKey:@"lockIdentifier"] doubleValue],
                     .title = std::string([[dictionary valueForKey:@"title"] UTF8String]),
                     .navigationType = stringToOnLoadingStartNavigationTypeEnum(std::string([[dictionary valueForKey:@"navigationType"] UTF8String])),
@@ -104,6 +106,7 @@ auto stringToOnLoadingFinishNavigationTypeEnum(std::string value) {
                 auto webViewEventEmitter = std::static_pointer_cast<RNCWebViewEventEmitter const>(_eventEmitter);
                 facebook::react::RNCWebViewEventEmitter::OnLoadingError data = {
                     .url = std::string([[dictionary valueForKey:@"url"] UTF8String]),
+                    .host = std::string([[dictionary valueForKey:@"host"] UTF8String]),
                     .lockIdentifier = [[dictionary valueForKey:@"lockIdentifier"] doubleValue],
                     .title = std::string([[dictionary valueForKey:@"title"] UTF8String]),
                     .code = [[dictionary valueForKey:@"code"] intValue],
@@ -121,6 +124,7 @@ auto stringToOnLoadingFinishNavigationTypeEnum(std::string value) {
                 auto webViewEventEmitter = std::static_pointer_cast<RNCWebViewEventEmitter const>(_eventEmitter);
                 facebook::react::RNCWebViewEventEmitter::OnMessage data = {
                     .url = std::string([[dictionary valueForKey:@"url"] UTF8String]),
+                    .host = std::string([[dictionary valueForKey:@"host"] UTF8String]),
                     .lockIdentifier = [[dictionary valueForKey:@"lockIdentifier"] doubleValue],
                     .title = std::string([[dictionary valueForKey:@"title"] UTF8String]),
                     .canGoBack = [[dictionary valueForKey:@"canGoBack"] boolValue],
@@ -136,6 +140,7 @@ auto stringToOnLoadingFinishNavigationTypeEnum(std::string value) {
                 auto webViewEventEmitter = std::static_pointer_cast<RNCWebViewEventEmitter const>(_eventEmitter);
                 facebook::react::RNCWebViewEventEmitter::OnLoadingFinish data = {
                     .url = std::string([[dictionary valueForKey:@"url"] UTF8String]),
+                    .host = std::string([[dictionary valueForKey:@"host"] UTF8String]),
                     .lockIdentifier = [[dictionary valueForKey:@"lockIdentifier"] doubleValue],
                     .title = std::string([[dictionary valueForKey:@"title"] UTF8String]),
                     .navigationType = stringToOnLoadingFinishNavigationTypeEnum(std::string([[dictionary valueForKey:@"navigationType"] UTF8String], [[dictionary valueForKey:@"navigationType"] lengthOfBytesUsingEncoding:NSUTF8StringEncoding])),
@@ -152,6 +157,7 @@ auto stringToOnLoadingFinishNavigationTypeEnum(std::string value) {
                 auto webViewEventEmitter = std::static_pointer_cast<RNCWebViewEventEmitter const>(_eventEmitter);
                 facebook::react::RNCWebViewEventEmitter::OnLoadingProgress data = {
                     .url = std::string([[dictionary valueForKey:@"url"] UTF8String]),
+                    .host = std::string([[dictionary valueForKey:@"host"] UTF8String]),
                     .lockIdentifier = [[dictionary valueForKey:@"lockIdentifier"] doubleValue],
                     .title = std::string([[dictionary valueForKey:@"title"] UTF8String]),
                     .canGoBack = [[dictionary valueForKey:@"canGoBack"] boolValue],
@@ -167,6 +173,7 @@ auto stringToOnLoadingFinishNavigationTypeEnum(std::string value) {
                 auto webViewEventEmitter = std::static_pointer_cast<RNCWebViewEventEmitter const>(_eventEmitter);
                 facebook::react::RNCWebViewEventEmitter::OnContentProcessDidTerminate data = {
                     .url = std::string([[dictionary valueForKey:@"url"] UTF8String]),
+                    .host = std::string([[dictionary valueForKey:@"host"] UTF8String]),
                     .lockIdentifier = [[dictionary valueForKey:@"lockIdentifier"] doubleValue],
                     .title = std::string([[dictionary valueForKey:@"title"] UTF8String]),
                     .canGoBack = [[dictionary valueForKey:@"canGoBack"] boolValue],
@@ -225,6 +232,7 @@ auto stringToOnLoadingFinishNavigationTypeEnum(std::string value) {
                 auto webViewEventEmitter = std::static_pointer_cast<RNCWebViewEventEmitter const>(_eventEmitter);
                 facebook::react::RNCWebViewEventEmitter::OnHttpError data = {
                     .url = std::string([[dictionary valueForKey:@"url"] UTF8String]),
+                    .host = std::string([[dictionary valueForKey:@"host"] UTF8String]),
                     .lockIdentifier = [[dictionary valueForKey:@"lockIdentifier"] doubleValue],
                     .title = std::string([[dictionary valueForKey:@"title"] UTF8String]),
                     .statusCode = [[dictionary valueForKey:@"statusCode"] intValue],
@@ -243,7 +251,7 @@ auto stringToOnLoadingFinishNavigationTypeEnum(std::string value) {
                 facebook::react::RNCWebViewEventEmitter::OnUriChange data = {
                     .uri = std::string([[dictionary valueForKey:@"uri"] UTF8String]),
                     .title = std::string([[dictionary valueForKey:@"title"] UTF8String]),
-                    .hostname = std::string([[dictionary valueForKey:@"hostname"] UTF8String]),
+                    .host = std::string([[dictionary valueForKey:@"host"] UTF8String]),
                     .currentHistoryIndex = [[dictionary valueForKey:@"currentHistoryIndex"] intValue],
                     .history = [[dictionary valueForKey:@"history"]]
                 };
@@ -279,6 +287,16 @@ auto stringToOnLoadingFinishNavigationTypeEnum(std::string value) {
                     .statusBar = std::string([[dictionary valueForKey:@"statusBar"] UTF8String])
                 };
                 webViewEventEmitter->onBackgroundChange(data);
+            }
+        };
+        
+        _view.onNewWindow = [self](NSDictionary* dictionary) {
+            if (_eventEmitter) {
+                auto webViewEventEmitter = std::static_pointer_cast<RNCWebViewEventEmitter const>(_eventEmitter);
+                facebook::react::RNCWebViewEventEmitter::OnNewWindow data = {
+                    .uri = std::string([[dictionary valueForKey:@"uri"] UTF8String]),
+                };
+                webViewEventEmitter->onNewWindow(data);
             }
         };
         

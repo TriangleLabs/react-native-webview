@@ -61,6 +61,7 @@ shouldStartLoadForRequest:(NSMutableDictionary<NSString *, id> *)request
 @property (nonatomic, copy) RCTDirectEventBlock onCanGoForwardChange;
 @property (nonatomic, copy) RCTDirectEventBlock onUriChange;
 @property (nonatomic, copy) RCTDirectEventBlock onBackgroundChange;
+@property (nonatomic, copy) RCTDirectEventBlock onNewWindow;
 /* Hourglass Custom End */
 
 @property (nonatomic, weak) id<RNCWebViewDelegate> _Nullable delegate;
