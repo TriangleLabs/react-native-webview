@@ -77,7 +77,7 @@ export type UriChangeEvent = NativeSyntheticEvent<{
   uri: string;
   host: string;
   currentHistoryIndex: number;
-  history: { uri: string; host: string }[];
+  history: { uri: string; title: string; host: string }[];
 }>;
 
 export type BackgroundChangeEvent = NativeSyntheticEvent<{

@@ -686,6 +686,7 @@ RCTAutoInsetsProtocol>
           
         _onUriChange(@{
           @"uri": [newURL absoluteString],
+          @"title": [[newURL host] stringByReplacingOccurrencesOfString:@"www." withString:@""],
           @"host": [newURL host],
           @"history": history,
           @"currentHistoryIndex": currentHistoryIndex
