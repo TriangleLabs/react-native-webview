@@ -6,12 +6,12 @@ import {
   ViewProps,
   StyleProp,
   ViewStyle,
-  NativeMethodsMixin,
+  NativeMethods,
   UIManagerStatic,
   NativeScrollEvent,
 } from 'react-native';
 
-import type NativeWebViewComponent from './RNCWebViewNativeComponent'
+import type NativeWebViewComponent from './RNCWebViewNativeComponent';
 
 type WebViewCommands =
   | 'goForward'
@@ -61,13 +61,13 @@ type Constructor<T> = new (...args: any[]) => T;
 
 // eslint-disable-next-line react/prefer-stateless-function
 declare class NativeWebViewMacOSComponent extends Component<MacOSNativeWebViewProps> {}
-declare const NativeWebViewMacOSBase: Constructor<NativeMethodsMixin> &
+declare const NativeWebViewMacOSBase: Constructor<NativeMethods> &
   typeof NativeWebViewMacOSComponent;
 export class NativeWebViewMacOS extends NativeWebViewMacOSBase {}
 
 // eslint-disable-next-line react/prefer-stateless-function
 declare class NativeWebViewWindowsComponent extends Component<WindowsNativeWebViewProps> {}
-declare const NativeWebViewWindowsBase: Constructor<NativeMethodsMixin> &
+declare const NativeWebViewWindowsBase: Constructor<NativeMethods> &
   typeof NativeWebViewWindowsComponent;
 export class NativeWebViewWindows extends NativeWebViewWindowsBase {}
 
@@ -240,9 +240,7 @@ export interface WebViewNativeConfig {
   /**
    * The native component used to render the WebView.
    */
-  component?:
-    | typeof NativeWebViewMacOS
-    | typeof NativeWebViewComponent;
+  component?: typeof NativeWebViewMacOS | typeof NativeWebViewComponent;
   /**
    * Set props directly on the native component WebView. Enables custom props which the
    * original WebView doesn't pass through.
@@ -673,11 +671,12 @@ export interface IOSWebViewProps extends WebViewSharedProps {
    * `selectedText`: the text selected on the document
    * @platform ios
    */
-  onCustomMenuSelection?: (event: {nativeEvent: {
-    label: string;
-    key: string;
-    selectedText: string;
-  }
+  onCustomMenuSelection?: (event: {
+    nativeEvent: {
+      label: string;
+      key: string;
+      selectedText: string;
+    };
   }) => void;
 }
 
@@ -1048,6 +1047,30 @@ export interface AndroidWebViewProps extends WebViewSharedProps {
 }
 
 export interface WebViewSharedProps extends ViewProps {
+  /* Hourglass Custom Start */
+  onUriChange?: (
+    event: NativeSyntheticEvent<{
+      uri: string;
+      hostname: string;
+      title: string;
+      currentHistoryIndex: number;
+      history: { uri: string; hostname: string; title: string }[];
+    }>,
+  ) => void;
+  onCanGoBackChange?: (
+    event: NativeSyntheticEvent<{ canGoBack: boolean }>,
+  ) => void;
+  onCanGoForwardChange?: (
+    event: NativeSyntheticEvent<{ canGoForward: boolean }>,
+  ) => void;
+  onBackgroundChange?: (
+    event: NativeSyntheticEvent<{
+      background: string;
+      statusBar: 'dark-content' | 'light-content';
+    }>,
+  ) => void;
+  /* Hourglass Custom End */
+
   /**
    * Loads static html or a uri (with optional headers) in the WebView.
    */
@@ -1088,7 +1111,7 @@ export interface WebViewSharedProps extends ViewProps {
   /**
    * Function that is invoked when the `WebView` scrolls.
    */
-   onScroll?: ComponentProps<typeof NativeWebViewComponent>['onScroll'];
+  onScroll?: ComponentProps<typeof NativeWebViewComponent>['onScroll'];
 
   /**
    * Function that is invoked when the `WebView` has finished loading.

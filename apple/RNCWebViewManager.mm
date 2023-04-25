@@ -49,6 +49,14 @@ RCT_EXPORT_MODULE(RNCWebView)
 }
 
 RCT_EXPORT_VIEW_PROPERTY(source, NSDictionary)
+
+/* Hourglass Custom Start */
+RCT_EXPORT_VIEW_PROPERTY(onUriChange, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onCanGoBackChange, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onCanGoForwardChange, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onBackgroundChange, RCTDirectEventBlock)
+/* Hourglass Custom End */
+
 // New arch only
 RCT_CUSTOM_VIEW_PROPERTY(newSource, NSDictionary, RNCWebViewImpl) {}
 RCT_EXPORT_VIEW_PROPERTY(onFileDownload, RCTDirectEventBlock)

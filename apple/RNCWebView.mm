@@ -236,6 +236,52 @@ auto stringToOnLoadingFinishNavigationTypeEnum(std::string value) {
                 webViewEventEmitter->onHttpError(data);
             }
         };
+        
+        _view.onUriChange = [self](NSDictionary* dictionary) {
+            if (_eventEmitter) {
+                auto webViewEventEmitter = std::static_pointer_cast<RNCWebViewEventEmitter const>(_eventEmitter);
+                facebook::react::RNCWebViewEventEmitter::OnUriChange data = {
+                    .uri = std::string([[dictionary valueForKey:@"uri"] UTF8String]),
+                    .title = std::string([[dictionary valueForKey:@"title"] UTF8String]),
+                    .hostname = std::string([[dictionary valueForKey:@"hostname"] UTF8String]),
+                    .currentHistoryIndex = [[dictionary valueForKey:@"currentHistoryIndex"] intValue],
+                    .history = [[dictionary valueForKey:@"history"]]
+                };
+                webViewEventEmitter->onUriChange(data);
+            }
+        };
+        
+        _view.onCanGoBackChange = [self](NSDictionary* dictionary) {
+            if (_eventEmitter) {
+                auto webViewEventEmitter = std::static_pointer_cast<RNCWebViewEventEmitter const>(_eventEmitter);
+                facebook::react::RNCWebViewEventEmitter::OnCanGoBackChange data = {
+                    .canGoBack = [[dictionary valueForKey:@"canGoBack"] boolValue]
+                };
+                webViewEventEmitter->onCanGoBackChange(data);
+            }
+        };
+        
+        _view.onCanGoForwardChange = [self](NSDictionary* dictionary) {
+            if (_eventEmitter) {
+                auto webViewEventEmitter = std::static_pointer_cast<RNCWebViewEventEmitter const>(_eventEmitter);
+                facebook::react::RNCWebViewEventEmitter::onCanGoForwardChange data = {
+                    .canGoForward = [[dictionary valueForKey:@"canGoForward"] boolValue]
+                };
+                webViewEventEmitter->onCanGoForwardChange(data);
+            }
+        };
+        
+        _view.onBackgroundChange = [self](NSDictionary* dictionary) {
+            if (_eventEmitter) {
+                auto webViewEventEmitter = std::static_pointer_cast<RNCWebViewEventEmitter const>(_eventEmitter);
+                facebook::react::RNCWebViewEventEmitter::onBackgroundChange data = {
+                    .background = std::string([[dictionary valueForKey:@"background"] UTF8String]),
+                    .statusBar = std::string([[dictionary valueForKey:@"statusBar"] UTF8String])
+                };
+                webViewEventEmitter->onBackgroundChange(data);
+            }
+        };
+        
         self.contentView = _view;
     }
     return self;

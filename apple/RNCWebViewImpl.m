@@ -82,6 +82,9 @@ RCTAutoInsetsProtocol>
 
 @implementation RNCWebViewImpl
 {
+  /* Hourglass Custom Start */
+  WKContentRuleList *_contentRuleList;
+  /* Hourglass Custom End */
 #if !TARGET_OS_OSX
   UIColor * _savedBackgroundColor;
 #else
@@ -325,6 +328,45 @@ RCTAutoInsetsProtocol>
 }
 #endif //Target_OS_OSX
 
+/* Hourglass Custom Start */
+- (void)setUpAdBlock {
+    if (@available(iOS 13, *)) {
+        NSString *contentRuleId = @"AdsBlockRules";
+        NSString *contentRuleFile = @"ads-block-rules";
+
+        [[WKContentRuleListStore defaultStore] lookUpContentRuleListForIdentifier:contentRuleId completionHandler:^(WKContentRuleList *contentRuleList, NSError *error) {
+            // contentRuleList hasn't been compiled yet
+            if (error != nil) {
+                NSLog(@"[RNCWebView] Compiling contentRuleList...");
+                NSString *currentFilePath = [NSString stringWithUTF8String:__FILE__];
+                NSURL *currentFileURL = [NSURL fileURLWithPath:currentFilePath];
+                NSURL *jsonFileURL = [[currentFileURL URLByDeletingLastPathComponent] URLByAppendingPathComponent:[contentRuleFile stringByAppendingPathExtension:@"json"]];
+                
+                [self compileContentRuleListWithContentRuleId:contentRuleId jsonFileURL:jsonFileURL];
+            } else {
+                NSLog(@"[RNCWebView] Loaded contentRuleList from cache");
+                self->_contentRuleList = contentRuleList;
+                [self->_webView.configuration.userContentController addContentRuleList:contentRuleList];
+            }
+        }];
+    }
+}
+
+- (void)compileContentRuleListWithContentRuleId:(NSString *)contentRuleId jsonFileURL:(NSURL *)jsonFileURL {
+    NSString *content = [NSString stringWithContentsOfURL:jsonFileURL encoding:NSUTF8StringEncoding error:nil];
+    
+    [[WKContentRuleListStore defaultStore] compileContentRuleListForIdentifier:contentRuleId encodedContentRuleList:content completionHandler:^(WKContentRuleList *contentRuleList, NSError *error) {
+        if (error != nil) {
+            NSLog(@"[RNCWebView] Error compiling content rule list: %@", error.localizedDescription);
+        } else {
+            self->_contentRuleList = contentRuleList;
+            [self->_webView.configuration.userContentController addContentRuleList:contentRuleList];
+        }
+        NSLog(@"[RNCWebView] Finished loading content rule list...");
+    }];
+}
+/* Hourglass Custom End */
+
 - (WKWebViewConfiguration *)setUpWkWebViewConfig
 {
   WKWebViewConfiguration *wkWebViewConfig = [WKWebViewConfiguration new];
@@ -404,6 +446,10 @@ RCTAutoInsetsProtocol>
   if (_applicationNameForUserAgent) {
     wkWebViewConfig.applicationNameForUserAgent = [NSString stringWithFormat:@"%@ %@", wkWebViewConfig.applicationNameForUserAgent, _applicationNameForUserAgent];
   }
+    
+  /* Hourglass Custom Start */
+  [self setUpAdBlock];
+  /* Hourglass Custom End */
 
   return wkWebViewConfig;
 }
@@ -438,6 +484,15 @@ RCTAutoInsetsProtocol>
 #endif // !TARGET_OS_OSX
     _webView.allowsLinkPreview = _allowsLinkPreview;
     [_webView addObserver:self forKeyPath:@"estimatedProgress" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
+    
+    /* Hourglass Custom Start */
+      [_webView addObserver:self forKeyPath:@"URL" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
+      [_webView addObserver:self forKeyPath:@"canGoBack" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
+      [_webView addObserver:self forKeyPath:@"canGoForward" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
+      [_webView addObserver:self forKeyPath:@"themeColor" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
+      [_webView addObserver:self forKeyPath:@"underPageBackgroundColor" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
+    /* Hourglass Custom End */
+      
     _webView.allowsBackForwardNavigationGestures = _allowsBackForwardNavigationGestures;
 
     _webView.customUserAgent = _userAgent;
@@ -489,6 +544,15 @@ RCTAutoInsetsProtocol>
     [_webView.configuration.userContentController removeScriptMessageHandlerForName:HistoryShimName];
     [_webView.configuration.userContentController removeScriptMessageHandlerForName:MessageHandlerName];
     [_webView removeObserver:self forKeyPath:@"estimatedProgress"];
+    
+    /* Hourglass Custom Start */
+      [_webView removeObserver:self forKeyPath:@"URL"];
+      [_webView removeObserver:self forKeyPath:@"canGoBack"];
+      [_webView removeObserver:self forKeyPath:@"canGoForward"];
+      [_webView removeObserver:self forKeyPath:@"themeColor"];
+      [_webView removeObserver:self forKeyPath:@"underPageBackgroundColor"];
+    /* Hourglass Custom End*/
+      
     [_webView removeFromSuperview];
 #if !TARGET_OS_OSX
     _webView.scrollView.delegate = nil;
@@ -565,12 +629,102 @@ RCTAutoInsetsProtocol>
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
   if ([keyPath isEqual:@"estimatedProgress"] && object == self.webView) {
-    if(_onLoadingProgress){
+    if(_onLoadingProgress) {
       NSMutableDictionary<NSString *, id> *event = [self baseEvent];
       [event addEntriesFromDictionary:@{@"progress":[NSNumber numberWithDouble:self.webView.estimatedProgress]}];
       _onLoadingProgress(event);
     }
-  }else{
+  }
+  /* Hourglass Custom Start */
+  else if ([keyPath isEqualToString:@"URL"] && object == self.webView) {
+      NSURL *newURL = (NSURL *)change[NSKeyValueChangeNewKey];
+      if (_onUriChange) {
+          WKBackForwardList *backForwardList = _webView.backForwardList;
+          NSMutableArray<NSDictionary<NSString *, id> *> *history = [NSMutableArray array];
+
+          for (WKBackForwardListItem *item in backForwardList.backList) {
+              NSMutableDictionary<NSString *, id> *entry = [NSMutableDictionary dictionary];
+              entry[@"uri"] = item.URL.absoluteString;
+              entry[@"title"] = item.title;
+              entry[@"hostname"] = item.URL.host;
+              [history addObject:entry];
+          }
+          // Add the current URL to the front of the array
+          NSMutableDictionary<NSString *, id> *entry = [NSMutableDictionary dictionary];
+          entry[@"uri"] = [newURL absoluteString];
+          entry[@"title"] = _webView.title;
+          entry[@"hostname"] = [newURL host];
+          [history addObject:entry];
+          // Add the URLs in the forward list to the end of the array
+          for (WKBackForwardListItem *item in backForwardList.forwardList) {
+              NSMutableDictionary<NSString *, id> *entry = [NSMutableDictionary dictionary];
+              entry[@"uri"] = item.URL.absoluteString;
+              entry[@"title"] = item.title;
+              entry[@"hostname"] = item.URL.host;
+              [history addObject:entry];
+          }
+          
+        _onUriChange(@{
+          @"uri": [newURL absoluteString],
+          @"title": _webView.title,
+          @"hostname": [newURL host],
+          @"history": history,
+          @"currentHistoryIndex": @(backForwardList.backList.count)
+        });
+      }   
+  }
+  else if ([keyPath isEqualToString:@"canGoBack"] && object == self.webView) {
+      BOOL canGoBack = [change[NSKeyValueChangeNewKey] boolValue];
+      if (_onCanGoBackChange) {
+        _onCanGoBackChange(@{@"canGoBack": @(canGoBack)});
+      }
+  }
+  else if ([keyPath isEqualToString:@"canGoForward"] && object == self.webView) {
+      BOOL canGoForward = [change[NSKeyValueChangeNewKey] boolValue];
+      if (canGoForward) {
+        _onCanGoForwardChange(@{@"canGoForward": @(canGoForward)});
+      }
+  }
+  else if (([keyPath isEqualToString:@"themeColor"] || [keyPath isEqualToString:@"underPageBackgroundColor"]) && object == self.webView) {
+          UIColor *themeColor = _webView.themeColor;
+          UIColor *underPageBackgroundColor = _webView.underPageBackgroundColor;
+
+          UIColor *newBackgroundColor = themeColor ?: underPageBackgroundColor;
+          
+          CGFloat red, green, blue, alpha;
+          [newBackgroundColor getRed:&red green:&green blue:&blue alpha:&alpha];
+
+          CGFloat luminance = (0.299 * red + 0.587 * green + 0.114 * blue);
+          
+          NSString *background = [NSString stringWithFormat:@"#%02lX%02lX%02lX",
+                  lroundf(red * 255),
+                  lroundf(green * 255),
+                  lroundf(blue * 255)];
+
+          if (newBackgroundColor) {
+              if (_onBackgroundChange) {
+                  _onBackgroundChange(@{
+                      @"background": background,
+                      @"statusBar": (luminance > 0.5) ? @"dark-content" : @"light-content"
+                  });
+                  
+                  // Set the color of the background View
+                  [self setBackgroundColor: newBackgroundColor];
+                  
+                  // Adjust color of refresh control accordingly
+                  if (_refreshControl) {
+                      if (luminance > 0.5) {
+                          _refreshControl.tintColor = [UIColor blackColor];
+                      } else {
+                          _refreshControl.tintColor = [UIColor whiteColor];
+                      }
+                  }
+              }
+          }
+      }
+/* Hourglas Custom End */
+  
+  else{
     [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
   }
 }
@@ -1196,7 +1350,7 @@ RCTAutoInsetsProtocol>
             @"lockIdentifier": @(lockIdentifier)
         }];
         _onShouldStartLoadWithRequest(event);
-        // decisionHandler(WKNavigationActionPolicyAllow);
+        // decisionHandler(WKN1`pavigationActionPolicyAllow);
         return;
     }
 
