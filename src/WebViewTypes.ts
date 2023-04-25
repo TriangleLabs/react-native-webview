@@ -71,6 +71,21 @@ declare const NativeWebViewWindowsBase: Constructor<NativeMethods> &
   typeof NativeWebViewWindowsComponent;
 export class NativeWebViewWindows extends NativeWebViewWindowsBase {}
 
+/* Hourglass Custom Start */
+export type UriChangeEvent = NativeSyntheticEvent<{
+  uri: string;
+  hostname: string;
+  title: string;
+  currentHistoryIndex: number;
+  history: { uri: string; hostname: string; title: string }[];
+}>;
+
+export type BackgroundChangeEvent = NativeSyntheticEvent<{
+  background: string;
+  statusBar: 'dark-content' | 'light-content';
+}>;
+/* Hourglass Custom End */
+
 export interface ContentInsetProp {
   top?: number;
   left?: number;
@@ -1048,27 +1063,14 @@ export interface AndroidWebViewProps extends WebViewSharedProps {
 
 export interface WebViewSharedProps extends ViewProps {
   /* Hourglass Custom Start */
-  onUriChange?: (
-    event: NativeSyntheticEvent<{
-      uri: string;
-      hostname: string;
-      title: string;
-      currentHistoryIndex: number;
-      history: { uri: string; hostname: string; title: string }[];
-    }>,
-  ) => void;
+  onUriChange?: (event: UriChangeEvent) => void;
   onCanGoBackChange?: (
     event: NativeSyntheticEvent<{ canGoBack: boolean }>,
   ) => void;
   onCanGoForwardChange?: (
     event: NativeSyntheticEvent<{ canGoForward: boolean }>,
   ) => void;
-  onBackgroundChange?: (
-    event: NativeSyntheticEvent<{
-      background: string;
-      statusBar: 'dark-content' | 'light-content';
-    }>,
-  ) => void;
+  onBackgroundChange?: (event: BackgroundChangeEvent) => void;
   /* Hourglass Custom End */
 
   /**
