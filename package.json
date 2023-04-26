@@ -17,14 +17,15 @@
     "macos": "react-native run-macos --scheme WebviewExample --project-path example/macos",
     "start": "cd example && react-native start",
     "windows": "install-windows-test-app --project-directory example/windows && react-native run-windows --root example --arch x64",
-    "ci": "CI=true && yarn lint",
-    "ci:publish": "yarn semantic-release",
-    "lint": "yarn tsc --noEmit && yarn eslint ./src --ext .ts,.tsx",
-    "build": "yarn tsc",
+    "ci": "CI=true && pnpm lint",
+    "ci:publish": "pnpm semantic-release",
+    "lint": "pnpm tsc --noEmit && pnpm eslint ./src --ext .ts,.tsx",
+    "build": "pnpm tsc",
+    "prepare": "pnpm build",
     "appium": "appium",
-    "test:windows": "yarn jest --setupFiles=./jest-setups/jest.setup.js",
-    "add:macos": "yarn add react-native-macos@0.68.62",
-    "nuke": "rm -rf node_modules; cd example; rm -rf ios/build; rm -rf ios/Pods; cd ..; yarn; cd example/ios; npx pod-install; cd ../..; yarn start"
+    "test:windows": "pnpm jest --setupFiles=./jest-setups/jest.setup.js",
+    "add:macos": "pnpm add react-native-macos@0.68.62",
+    "nuke": "rm -rf node_modules; cd example; rm -rf ios/build; rm -rf ios/Pods; cd ..; pnpm i; cd example/ios; npx pod-install; cd ../..; pnpm start"
   },
   "rn-docs": {
     "title": "Webview",

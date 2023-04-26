@@ -191,7 +191,9 @@ const WebViewComponent = forwardRef<{}, IOSWebViewProps>(
     const NativeWebView =
       (nativeConfig?.component as typeof RNCWebView | undefined) || RNCWebView;
 
-    const sourceResolved = resolveAssetSource(source as ImageSourcePropType);
+    const sourceResolved = source
+      ? resolveAssetSource(source as ImageSourcePropType)
+      : {};
     const newSource =
       typeof sourceResolved === 'object'
         ? Object.entries(sourceResolved as WebViewSourceUri).reduce(
