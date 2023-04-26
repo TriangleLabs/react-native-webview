@@ -7,6 +7,7 @@ import {
   WithDefault,
 } from 'react-native/Libraries/Types/CodegenTypes';
 import codegenNativeCommands from 'react-native/Libraries/Utilities/codegenNativeCommands';
+import { WebViewSourceUri } from 'WebViewTypes';
 
 export type WebViewNativeEvent = Readonly<{
   url: string;
@@ -304,6 +305,10 @@ export interface NativeProps extends ViewProps {
 }
 
 export interface NativeCommands {
+  loadSource: (
+    viewRef: React.ElementRef<HostComponent<NativeProps>>,
+    source: WebViewSourceUri,
+  ) => void;
   goBack: (viewRef: React.ElementRef<HostComponent<NativeProps>>) => void;
   goForward: (viewRef: React.ElementRef<HostComponent<NativeProps>>) => void;
   reload: (viewRef: React.ElementRef<HostComponent<NativeProps>>) => void;
@@ -346,6 +351,7 @@ export const Commands = codegenNativeCommands<NativeCommands>({
     'clearFormData',
     'clearCache',
     'clearHistory',
+    'loadSource',
   ],
 });
 

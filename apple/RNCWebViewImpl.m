@@ -679,6 +679,7 @@ RCTAutoInsetsProtocol>
     }
     /* Hourglass Custom Start */
     else if ([keyPath isEqualToString:@"URL"] && object == self.webView) {
+       
         NSURL *newURL = (NSURL *)change[NSKeyValueChangeNewKey];
         if (_onUriChange) {
             NSDictionary *historyInfo = [self getHistory:_webView];
@@ -888,10 +889,17 @@ RCTAutoInsetsProtocol>
 
 - (void)visitSource
 {
+    NSDictionary *sourceToLoad = [NSDictionary dictionaryWithDictionary:_source];
+
+    if (!_hasLoadedInitialSource && _initialSource) {
+        sourceToLoad = _initialSource;
+        _hasLoadedInitialSource = true;
+    }
+    
     // Check for a static html source first
-    NSString *html = [RCTConvert NSString:_source[@"html"]];
+    NSString *html = [RCTConvert NSString:sourceToLoad[@"html"]];
     if (html) {
-        NSURL *baseURL = [RCTConvert NSURL:_source[@"baseUrl"]];
+        NSURL *baseURL = [RCTConvert NSURL:sourceToLoad[@"baseUrl"]];
         if (!baseURL) {
             baseURL = [NSURL URLWithString:@"about:blank"];
         }
@@ -899,18 +907,16 @@ RCTAutoInsetsProtocol>
         return;
     }
     // Add cookie for subsequent resource requests sent by page itself, if cookie was set in headers on WebView
-    NSString *headerCookie = [RCTConvert NSString:_source[@"headers"][@"cookie"]];
+    NSString *headerCookie = [RCTConvert NSString:sourceToLoad[@"headers"][@"cookie"]];
     if(headerCookie) {
         NSDictionary *headers = [NSDictionary dictionaryWithObjectsAndKeys:headerCookie,@"Set-Cookie",nil];
-        NSURL *urlString = [NSURL URLWithString:_source[@"uri"]];
+        NSURL *urlString = [NSURL URLWithString:sourceToLoad[@"uri"]];
         NSArray *httpCookies = [NSHTTPCookie cookiesWithResponseHeaderFields:headers forURL:urlString];
         [self writeCookiesToWebView:httpCookies completion:nil];
     }
-    
-    NSURLRequest *request = [self requestForSource:_source];
+    NSURLRequest *request = [self requestForSource:sourceToLoad];
     __weak WKWebView *webView = _webView;
     NSString *allowingReadAccessToURL = _allowingReadAccessToURL;
-    
     [self syncCookiesToWebView:^{
         // Because of the way React works, as pages redirect, we actually end up
         // passing the redirect urls back here, so we ignore them if trying to load
@@ -1586,6 +1592,15 @@ didFinishNavigation:(WKNavigation *)navigation
     }
 }
 
+/* Hourglass Custom Start */
+- (void)loadSource:(NSDictionary *)source {
+    NSString *uri = source[@"uri"];
+    NSURL *url = [NSURL URLWithString:uri];
+    NSURLRequest *request = [NSURLRequest requestWithURL:url];
+    [_webView loadRequest:request];
+}
+/* Hourglass Custom End */
+
 - (void)injectJavaScript:(NSString *)script
 {
     [self evaluateJS: script thenCall: nil];
@@ -1881,8 +1896,8 @@ didFinishNavigation:(WKNavigation *)navigation
     }
 }
 
-- (NSURLRequest *)requestForSource:(id)json {
-    NSURLRequest *request = [RCTConvert NSURLRequest:self.source];
+- (NSURLRequest *)requestForSource:(id)src {
+    NSURLRequest *request = [RCTConvert NSURLRequest:src];
     
     // If sharedCookiesEnabled we automatically add all application cookies to the
     // http request. This is automatically done on iOS 11+ in the WebView constructor.

@@ -25,7 +25,7 @@
     "appium": "appium",
     "test:windows": "yarn jest --setupFiles=./jest-setups/jest.setup.js",
     "add:macos": "yarn add react-native-macos@0.68.62",
-    "nuke": "rm -rf node_modules; cd example; rm -rf ios/build; rm -rf ios/Pods; cd ..; pnpm i; cd example/ios; npx pod-install; cd ../..; pnpm start"
+    "nuke": "rm -rf node_modules; cd example; rm -rf ios/build; rm -rf ios/Pods; cd ..; yarn; cd example/ios; npx pod-install; cd ../..; pnpm start"
   },
   "rn-docs": {
     "title": "Webview",

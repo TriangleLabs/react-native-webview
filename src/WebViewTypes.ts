@@ -21,7 +21,8 @@ type WebViewCommands =
   | 'postMessage'
   | 'injectJavaScript'
   | 'loadUrl'
-  | 'requestFocus';
+  | 'requestFocus'
+  | 'loadSource';
 
 type AndroidWebViewCommands = 'clearHistory' | 'clearCache' | 'clearFormData';
 
@@ -384,6 +385,7 @@ export interface IOSWebViewProps extends Omit<WebViewSharedProps, 'onLoadEnd'> {
   onLoadEnd: (
     event: WebViewNavigationEventWithHistory | WebViewErrorEvent,
   ) => void;
+  loadSource: (source: WebViewSource) => void;
   /* Hourglass Custom End */
 
   /**

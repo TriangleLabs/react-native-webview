@@ -132,6 +132,8 @@ const WebViewComponent = forwardRef<{}, IOSWebViewProps>(
     useImperativeHandle(
       ref,
       () => ({
+        loadSource: (source: WebViewSourceUri) =>
+          webViewRef.current && Commands.loadSource(webViewRef.current, source),
         goForward: () =>
           webViewRef.current && Commands.goForward(webViewRef.current),
         goBack: () => webViewRef.current && Commands.goBack(webViewRef.current),

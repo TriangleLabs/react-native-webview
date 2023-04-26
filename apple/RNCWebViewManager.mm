@@ -211,6 +211,10 @@ QUICK_RCT_EXPORT_COMMAND_METHOD(goForward)
 QUICK_RCT_EXPORT_COMMAND_METHOD(stopLoading)
 QUICK_RCT_EXPORT_COMMAND_METHOD(requestFocus)
 
+/* Hourglass Custom Start */
+QUICK_RCT_EXPORT_COMMAND_METHOD_PARAMS(loadSource, source:(NSDictionary *)source, source)
+/* Hourglass Custom End */
+
 QUICK_RCT_EXPORT_COMMAND_METHOD_PARAMS(postMessage, message:(NSString *)message, message)
 QUICK_RCT_EXPORT_COMMAND_METHOD_PARAMS(injectJavaScript, script:(NSString *)script, script)
 

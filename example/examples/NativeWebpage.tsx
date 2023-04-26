@@ -1,5 +1,5 @@
 import React, { Component, useRef } from 'react';
-import { Button, Text, View } from 'react-native';
+import { Button, Text, View, TextInput } from 'react-native';
 
 import WebView from 'react-native-webview';
 
@@ -26,7 +26,22 @@ export const NativeWebpage = () => {
       </View>
 
       <Text>Loading: {loadingProgress}</Text>
-      <Text>{uri}</Text>
+      <TextInput
+        onChangeText={setUri}
+        autoCapitalize="none"
+        style={{
+          padding: 16,
+          backgroundColor: '#f4f4f4',
+        }}
+      />
+      <Button
+        title="load"
+        onPress={() =>
+          ref.current?.loadSource({
+            uri,
+          })
+        }
+      />
       <WebView
         ref={ref}
         scrollEnabled
@@ -42,7 +57,6 @@ export const NativeWebpage = () => {
         }}
         onUriChange={(e) => {
           console.log(e.nativeEvent);
-          setUri(e.nativeEvent.uri);
         }}
         onCanGoBackChange={(e) => {
           console.log('onCanGoBack: ', e.nativeEvent);
