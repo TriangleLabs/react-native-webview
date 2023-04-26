@@ -1608,11 +1608,13 @@ didFinishNavigation:(WKNavigation *)navigation
 
 - (void)goForward
 {
+    [_webView stopLoading];
     [_webView goForward];
 }
 
 - (void)goBack
 {
+    [_webView stopLoading];
     [_webView goBack];
 }
 

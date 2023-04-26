@@ -13,9 +13,10 @@ export {
   WebViewNavigation,
 } from './lib/WebViewTypes';
 
-export type WebViewProps = IOSWebViewProps &
-  AndroidWebViewProps &
-  WindowsWebViewProps;
+export type WebViewProps =
+  | IOSWebViewProps
+  | AndroidWebViewProps
+  | WindowsWebViewProps;
 
 declare class WebView<P = {}> extends Component<WebViewProps & P> {
   loadSource: (source: WebViewSourceUri) => void;

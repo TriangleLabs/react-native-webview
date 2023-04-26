@@ -9,6 +9,11 @@ export const NativeWebpage = () => {
   const [canGoBack, setCanGoBack] = React.useState(false);
   const [canGoForward, setCanGoForward] = React.useState(false);
   const [loadingProgress, setLoadingProgress] = React.useState(0);
+  const [history, setHistory] = React.useState({
+    history: ['https://medium.com'],
+    currentHistoryIndex: 0,
+    historyLength: 1,
+  });
 
   return (
     <View style={{ height: 800 }}>
@@ -25,14 +30,26 @@ export const NativeWebpage = () => {
         />
       </View>
 
-      <Text>Loading: {loadingProgress}</Text>
+      {/* <Text>Loading: {loadingProgress}</Text> */}
+      <Text>History: {history.historyLength}</Text>
+      <Text>Index: {history.currentHistoryIndex}</Text>
+      <Text>
+        Current site: {history.history[history.currentHistoryIndex].uri}
+      </Text>
       <TextInput
         onChangeText={setUri}
         autoCapitalize="none"
+        autoComplete="off"
+        autoCorrect={false}
         style={{
           padding: 16,
           backgroundColor: '#f4f4f4',
         }}
+        onSubmitEditing={() =>
+          ref.current?.loadSource({
+            uri,
+          })
+        }
       />
       <Button
         title="load"
@@ -43,36 +60,36 @@ export const NativeWebpage = () => {
         }
       />
       <WebView
+        allowsInlineMediaPlayback
         ref={ref}
         scrollEnabled
         initialSource={{ uri }}
         source={{ uri: 'not-being-used' }}
         style={{ width: '100%', height: '100%' }}
-        onShouldStartLoadWithRequest={(event) => {
-          // console.log('onShouldStartLoadWithRequest', event);
-          return true;
-        }}
-        onLoadStart={(event) => {
-          // console.log('onLoadStart', event.nativeEvent);
-        }}
         onUriChange={(e) => {
-          console.log(e.nativeEvent);
+          const { currentHistoryIndex, history } = e.nativeEvent;
+          console.log({ currentHistoryIndex, history: history.length });
+          setHistory({
+            currentHistoryIndex,
+            history,
+            historyLength: history.length,
+          });
         }}
         onCanGoBackChange={(e) => {
           console.log('onCanGoBack: ', e.nativeEvent);
           setCanGoBack(e.nativeEvent.canGoBack);
         }}
         onCanGoForwardChange={(e) => {
-          console.log('onCanGoForward: ', e.nativeEvent);
+          // console.log('onCanGoForward: ', e.nativeEvent);
           setCanGoForward(e.nativeEvent.canGoForward);
         }}
         onLoadEnd={(event) => {
-          console.log('onLoadEnd', event.nativeEvent);
+          // console.log('onLoadEnd', event.nativeEvent);
         }}
-        onBackgroundChange={(e) => console.log('background: ', e.nativeEvent)}
-        onNewWindow={(e) => console.log('new window: ', e.nativeEvent)}
+        // onBackgroundChange={(e) => console.log('background: ', e.nativeEvent)}
+        // onNewWindow={(e) => console.log('new window: ', e.nativeEvent)}
         onLoadProgress={(e) => {
-          console.log('here');
+          // console.log('here');
           setLoadingProgress(e.nativeEvent.progress);
         }}
       />
