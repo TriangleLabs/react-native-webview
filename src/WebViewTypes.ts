@@ -385,7 +385,6 @@ export interface IOSWebViewProps extends Omit<WebViewSharedProps, 'onLoadEnd'> {
   onLoadEnd: (
     event: WebViewNavigationEventWithHistory | WebViewErrorEvent,
   ) => void;
-  loadSource: (source: WebViewSource) => void;
   /* Hourglass Custom End */
 
   /**
