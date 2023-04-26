@@ -31,7 +31,7 @@ export const NativeWebpage = () => {
         ref={ref}
         scrollEnabled
         initialSource={{ uri }}
-        source={{ uri }}
+        source={{ uri: 'not-being-used' }}
         style={{ width: '100%', height: '100%' }}
         onShouldStartLoadWithRequest={(event) => {
           // console.log('onShouldStartLoadWithRequest', event);
