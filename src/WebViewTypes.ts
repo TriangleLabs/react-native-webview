@@ -369,7 +369,7 @@ export interface WindowsWebViewProps extends WebViewSharedProps {
   useWebView2?: boolean;
 }
 
-export interface IOSWebViewProps extends WebViewSharedProps {
+export interface IOSWebViewProps extends Omit<WebViewSharedProps, 'onLoadEnd'> {
   /* Hourglass Custom Start */
   initialSource?: WebViewSource;
   onUriChange?: (event: UriChangeEvent) => void;
@@ -381,7 +381,9 @@ export interface IOSWebViewProps extends WebViewSharedProps {
   ) => void;
   onBackgroundChange?: (event: BackgroundChangeEvent) => void;
   onNewWindow?: (event: NativeSyntheticEvent<{ uri: string }>) => void;
-  onLoadingFinish: (event: WebViewNavigationEvent) => void;
+  onLoadEnd: (
+    event: WebViewNavigationEventWithHistory | WebViewErrorEvent,
+  ) => void;
   /* Hourglass Custom End */
 
   /**
@@ -1136,9 +1138,7 @@ export interface WebViewSharedProps extends ViewProps {
   /**
    * Function that is invoked when the `WebView` load succeeds or fails.
    */
-  onLoadEnd?: (
-    event: WebViewNavigationEventWithHistory | WebViewErrorEvent,
-  ) => void;
+  onLoadEnd?: (event: WebViewNavigationEvent | WebViewErrorEvent) => void;
 
   /**
    * Function that is invoked when the `WebView` starts loading.
