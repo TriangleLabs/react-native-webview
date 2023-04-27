@@ -85,6 +85,8 @@ RCTAutoInsetsProtocol>
     /* Hourglass Custom Start */
     WKContentRuleList *_contentRuleList;
     BOOL _hasLoadedInitialSource;
+    BOOL _isLoadingNewSource;
+    NSDictionary *_lastSourceLoaded;
     /* Hourglass Custom End */
 #if !TARGET_OS_OSX
     UIColor * _savedBackgroundColor;
@@ -517,7 +519,14 @@ RCTAutoInsetsProtocol>
         [self addSubview:_webView];
         [self setHideKeyboardAccessoryView: _savedHideKeyboardAccessoryView];
         [self setKeyboardDisplayRequiresUserAction: _savedKeyboardDisplayRequiresUserAction];
-        [self visitSource];
+        
+        if (_initialSource != nil) {
+            [self visitSource:_initialSource];
+            _hasLoadedInitialSource = true;
+        } else {
+            [self visitSource:_source];
+        }
+        
     }
 #if !TARGET_OS_OSX
     // Allow this object to recognize gestures
@@ -836,25 +845,11 @@ RCTAutoInsetsProtocol>
 
 - (void)setSource:(NSDictionary *)source
 {
-    /* Hourglass Custom Start */
-    if (_initialSource != nil) {
-        if (!_hasLoadedInitialSource) {
-            _source = [_initialSource copy];
-            
-            if (_webView != nil) {
-                [self visitSource];
-                _hasLoadedInitialSource = true;
-            }
-        }
-        return;
-    }
-    /* Hourglass Custom End */
-    
     if (![_source isEqualToDictionary:source]) {
         _source = [source copy];
         
         if (_webView != nil) {
-            [self visitSource];
+            [self visitSource:_source];
         }
     }
 }
@@ -865,7 +860,7 @@ RCTAutoInsetsProtocol>
         _allowingReadAccessToURL = [allowingReadAccessToURL copy];
         
         if (_webView != nil) {
-            [self visitSource];
+            [self visitSource:_source];
         }
     }
 }
@@ -887,14 +882,9 @@ RCTAutoInsetsProtocol>
 }
 #endif // !TARGET_OS_OSX
 
-- (void)visitSource
+- (void)visitSource:(NSDictionary *)source
 {
-    NSDictionary *sourceToLoad = [NSDictionary dictionaryWithDictionary:_source];
-
-    if (!_hasLoadedInitialSource && _initialSource) {
-        sourceToLoad = _initialSource;
-        _hasLoadedInitialSource = true;
-    }
+    NSDictionary *sourceToLoad = [NSDictionary dictionaryWithDictionary:source];
     
     // Check for a static html source first
     NSString *html = [RCTConvert NSString:sourceToLoad[@"html"]];
@@ -938,6 +928,8 @@ RCTAutoInsetsProtocol>
             [webView loadFileURL:request.URL allowingReadAccessToURL:readAccessUrl];
         }
     }];
+    
+    _lastSourceLoaded = sourceToLoad;
 }
 
 #if !TARGET_OS_OSX
@@ -1445,7 +1437,7 @@ RCTAutoInsetsProtocol>
         if ([navigationResponse.response isKindOfClass:[NSHTTPURLResponse class]]) {
             NSHTTPURLResponse *response = (NSHTTPURLResponse *)navigationResponse.response;
             NSInteger statusCode = response.statusCode;
-            
+
             if (statusCode >= 400) {
                 NSMutableDictionary<NSString *, id> *httpErrorEvent = [self baseEvent];
                 [httpErrorEvent addEntriesFromDictionary: @{
@@ -1504,6 +1496,10 @@ RCTAutoInsetsProtocol>
         }
         
         NSMutableDictionary<NSString *, id> *event = [self baseEvent];
+        event[@"url"] = _lastSourceLoaded[@"uri"];
+        event[@"host"] = [NSURL URLWithString:_lastSourceLoaded[@"uri"]].host;
+        event[@"title"] = [NSURL URLWithString:_lastSourceLoaded[@"uri"]].host;
+
         [event addEntriesFromDictionary:@{
             @"didFailProvisionalNavigation": @YES,
             @"domain": error.domain,
@@ -1593,11 +1589,10 @@ didFinishNavigation:(WKNavigation *)navigation
 }
 
 /* Hourglass Custom Start */
-- (void)loadSource:(NSDictionary *)source {
-    NSString *uri = source[@"uri"];
-    NSURL *url = [NSURL URLWithString:uri];
-    NSURLRequest *request = [NSURLRequest requestWithURL:url];
-    [_webView loadRequest:request];
+- (void)loadSource:(NSDictionary *)newSource {
+    _isLoadingNewSource = true;
+    [self visitSource:newSource];
+    _isLoadingNewSource = false;
 }
 /* Hourglass Custom End */
 

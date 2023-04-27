@@ -92,6 +92,12 @@ export const NativeWebpage = () => {
           // console.log('here');
           setLoadingProgress(e.nativeEvent.progress);
         }}
+        onError={(e) => {
+          console.log(e.nativeEvent);
+          ref.current?.loadSource({
+            uri: 'https://google.com?q=' + uri.replace('https://', ''),
+          });
+        }}
       />
     </View>
   );
