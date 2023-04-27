@@ -94,9 +94,9 @@ export const NativeWebpage = () => {
         }}
         onError={(e) => {
           console.log(e.nativeEvent);
-          ref.current?.loadSource({
-            uri: 'https://google.com?q=' + uri.replace('https://', ''),
-          });
+          // ref.current?.loadSource({
+          //   uri: 'https://google.com?q=' + uri.replace('https://', ''),
+          // });
         }}
       />
     </View>

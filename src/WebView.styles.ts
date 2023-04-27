@@ -1,4 +1,4 @@
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, ViewStyle, TextStyle, PlatformColor } from 'react-native';
 
 interface Styles {
   container: ViewStyle;
@@ -21,7 +21,7 @@ const styles = StyleSheet.create<Styles>({
     alignItems: 'center',
     height: '100%',
     width: '100%',
-    backgroundColor: 'white'
+    backgroundColor: 'white',
   },
   loadingProgressBar: {
     height: 20,
@@ -32,9 +32,9 @@ const styles = StyleSheet.create<Styles>({
     marginBottom: 2,
   },
   errorTextTitle: {
-    fontSize: 15,
-    fontWeight: '500',
-    marginBottom: 10,
+    fontSize: 17,
+    fontWeight: '400',
+    color: PlatformColor('systemGray'),
   },
   webView: {
     backgroundColor: '#ffffff',
