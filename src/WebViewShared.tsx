@@ -76,11 +76,7 @@ const defaultRenderLoading = () => (
     <ActivityIndicator />
   </View>
 );
-const defaultRenderError = (
-  errorDomain: string | undefined,
-  errorCode: number,
-  errorDesc: string,
-) => (
+const defaultRenderError = () => (
   <View style={styles.loadingOrErrorView}>
     <Text style={styles.errorTextTitle}>
       Hourglass cannot load this website
