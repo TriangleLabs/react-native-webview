@@ -690,18 +690,22 @@ RCTAutoInsetsProtocol>
     else if ([keyPath isEqualToString:@"URL"] && object == self.webView) {
        
         NSURL *newURL = (NSURL *)change[NSKeyValueChangeNewKey];
-        if (newURL && _onUriChange) {
+        NSLog(@"newURL: %@", newURL);
+        if (_onUriChange) {
             NSDictionary *historyInfo = [self getHistory:_webView];
             NSArray *history = historyInfo[@"history"];
             NSNumber *currentHistoryIndex = historyInfo[@"currentHistoryIndex"];
             
-            _onUriChange(@{
-                @"uri": [newURL absoluteString],
-                @"title": [[newURL host] stringByReplacingOccurrencesOfString:@"www." withString:@""],
-                @"host": [newURL host],
-                @"history": history,
-                @"currentHistoryIndex": currentHistoryIndex
-            });
+            if (newURL.host) {
+                _onUriChange(@{
+                    @"uri": [newURL absoluteString],
+                    @"title": [[newURL host] stringByReplacingOccurrencesOfString:@"www." withString:@""],
+                    @"host": [newURL host],
+                    @"history": history,
+                    @"currentHistoryIndex": currentHistoryIndex
+                });
+            }
+            
         }
     }
     else if ([keyPath isEqualToString:@"canGoBack"] && object == self.webView) {
