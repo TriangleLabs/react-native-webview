@@ -690,7 +690,7 @@ RCTAutoInsetsProtocol>
     else if ([keyPath isEqualToString:@"URL"] && object == self.webView) {
        
         NSURL *newURL = (NSURL *)change[NSKeyValueChangeNewKey];
-        if (_onUriChange) {
+        if (newURL && _onUriChange) {
             NSDictionary *historyInfo = [self getHistory:_webView];
             NSArray *history = historyInfo[@"history"];
             NSNumber *currentHistoryIndex = historyInfo[@"currentHistoryIndex"];
