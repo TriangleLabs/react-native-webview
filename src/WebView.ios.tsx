@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useImperativeHandle,
   useRef,
+  useState,
 } from 'react';
 import { Image, View, ImageSourcePropType, HostComponent } from 'react-native';
 import invariant from 'invariant';
@@ -20,6 +21,9 @@ import {
   IOSWebViewProps,
   DecelerationRateConstant,
   WebViewSourceUri,
+  WebViewNavigationEvent,
+  WebViewHttpError,
+  WebViewHttpErrorEvent,
 } from './WebViewTypes';
 
 import styles from './WebView.styles';
@@ -129,6 +133,17 @@ const WebViewComponent = forwardRef<{}, IOSWebViewProps>(
       onContentProcessDidTerminateProp,
     });
 
+    const [isErrorCallbackDone, setIsErrorCallbackDone] = useState(false);
+    const handleLoadingStart = (e: WebViewNavigationEvent) => {
+      setIsErrorCallbackDone(false);
+      onLoadingStart(e);
+    };
+
+    const handleError = (e: WebViewHttpErrorEvent) => {
+      onHttpError(e);
+      setIsErrorCallbackDone(true);
+    };
+
     useImperativeHandle(
       ref,
       () => ({
@@ -176,11 +191,13 @@ const WebViewComponent = forwardRef<{}, IOSWebViewProps>(
         lastErrorEvent != null,
         'lastErrorEvent expected to be non-null',
       );
-      otherView = (renderError || defaultRenderError)(
-        lastErrorEvent?.domain,
-        lastErrorEvent?.code ?? 0,
-        lastErrorEvent?.description ?? '',
-      );
+      if (isErrorCallbackDone) {
+        otherView = (renderError || defaultRenderError)(
+          lastErrorEvent?.domain,
+          lastErrorEvent?.code ?? 0,
+          lastErrorEvent?.description ?? '',
+        );
+      }
     } else if (viewState !== 'IDLE') {
       console.error(`RNCWebView invalid state encountered: ${viewState}`);
     }
@@ -234,8 +251,8 @@ const WebViewComponent = forwardRef<{}, IOSWebViewProps>(
         onLoadingFinish={onLoadingFinish}
         onLoadingProgress={onLoadingProgress}
         onFileDownload={onFileDownload}
-        onLoadingStart={onLoadingStart}
-        onHttpError={onHttpError}
+        onLoadingStart={handleLoadingStart}
+        onHttpError={handleError}
         onMessage={onMessage}
         onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
         onContentProcessDidTerminate={onContentProcessDidTerminate}
