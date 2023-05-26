@@ -22,7 +22,6 @@ import {
   DecelerationRateConstant,
   WebViewSourceUri,
   WebViewNavigationEvent,
-  WebViewHttpError,
   WebViewHttpErrorEvent,
 } from './WebViewTypes';
 
