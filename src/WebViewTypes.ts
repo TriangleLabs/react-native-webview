@@ -183,7 +183,11 @@ export type WebViewHttpErrorEvent = NativeSyntheticEvent<WebViewHttpError>;
 export type WebViewRenderProcessGoneEvent =
   NativeSyntheticEvent<WebViewRenderProcessGoneDetail>;
 
-export type WebViewScrollEvent = NativeSyntheticEvent<NativeScrollEvent>;
+export type WebViewScrollEvent = NativeSyntheticEvent<
+  NativeScrollEvent & {
+    scrollDirection: 1 | -1;
+  }
+>;
 
 export type DataDetectorTypes =
   | 'phoneNumber'
