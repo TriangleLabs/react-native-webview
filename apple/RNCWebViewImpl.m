@@ -87,6 +87,8 @@ RCTAutoInsetsProtocol>
     BOOL _hasLoadedInitialSource;
     BOOL _isLoadingNewSource;
     NSDictionary *_lastSourceLoaded;
+    int scrollDirection;
+    CGFloat lastContentScrollOffset;
     /* Hourglass Custom End */
 #if !TARGET_OS_OSX
     UIColor * _savedBackgroundColor;
@@ -129,6 +131,10 @@ RCTAutoInsetsProtocol>
         _autoManageStatusBarEnabled = YES;
         _contentInset = UIEdgeInsetsZero;
         _savedKeyboardDisplayRequiresUserAction = YES;
+        
+        /* Hourglass custom start */
+        self->scrollDirection = 1;
+        /* Hourglass custom end */
 #if !TARGET_OS_OSX
         _savedStatusBarStyle = RCTSharedApplication().statusBarStyle;
         _savedStatusBarHidden = RCTSharedApplication().statusBarHidden;
@@ -675,7 +681,6 @@ RCTAutoInsetsProtocol>
         @"currentHistoryIndex": currentHistoryIndex
     };
 }
-
 /* Hourglass Custom End */
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
@@ -1046,6 +1051,7 @@ RCTAutoInsetsProtocol>
 {
     scrollView.decelerationRate = _decelerationRate;
 }
+
 #endif // !TARGET_OS_OSX
 
 - (void)setUserAgent:(NSString*)userAgent
@@ -1071,6 +1077,25 @@ RCTAutoInsetsProtocol>
         scrollView.bounds = _webView.bounds;
     }
     else if (_onScroll != nil) {
+        /* Hourglass custom start */
+        int scrollThreshold = 16.0;
+        
+        // Only change the scroll direction if it's from user interaction
+        if (scrollView.isDragging) {
+            CGFloat y = scrollView.contentOffset.y;
+            // scrolling down
+            if (y > (self->lastContentScrollOffset + scrollThreshold)) {
+                self->scrollDirection = -1;
+                self->lastContentScrollOffset = y;
+            }
+            // scrolling up
+            else if (y < (self->lastContentScrollOffset - scrollThreshold)) {
+                self->scrollDirection = 1;
+                self->lastContentScrollOffset = y;
+            }
+        }
+        /* Hourglass custom end */
+        
         NSDictionary *event = @{
             @"contentOffset": @{
                 @"x": @(scrollView.contentOffset.x),
@@ -1091,6 +1116,7 @@ RCTAutoInsetsProtocol>
                 @"height": @(scrollView.frame.size.height)
             },
             @"zoomScale": @(scrollView.zoomScale ?: 1),
+            @"scrollDirection": @(self->scrollDirection),
         };
         _onScroll(event);
     }

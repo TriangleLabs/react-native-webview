@@ -147,6 +147,7 @@ type ScrollEvent = Readonly<{
   };
   zoomScale?: Double;
   responderIgnoreScroll?: boolean;
+  scrollDirection: 1 | -1;
 }>;
 
 type WebViewRenderProcessGoneEvent = Readonly<{
