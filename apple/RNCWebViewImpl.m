@@ -1079,19 +1079,22 @@ RCTAutoInsetsProtocol>
     else if (_onScroll != nil) {
         /* Hourglass custom start */
         int scrollThreshold = 16.0;
-        
-        // Only change the scroll direction if it's from user interaction
-        if (scrollView.isDragging) {
-            CGFloat y = scrollView.contentOffset.y;
-            // scrolling down
-            if (y > (self->lastContentScrollOffset + scrollThreshold)) {
-                self->scrollDirection = -1;
-                self->lastContentScrollOffset = y;
-            }
-            // scrolling up
-            else if (y < (self->lastContentScrollOffset - scrollThreshold)) {
-                self->scrollDirection = 1;
-                self->lastContentScrollOffset = y;
+        BOOL bouncing = (scrollView.contentOffset.y < -scrollView.contentInset.top) || (scrollView.contentOffset.y > scrollView.contentSize.height - scrollView.bounds.size.height - scrollThreshold);
+        // Only change the scroll direction if it's from user interaction and not bouncing
+        if (!bouncing) {
+            if (scrollView.isDragging) {
+                CGFloat y = scrollView.contentOffset.y;
+                
+                // scrolling down
+                if (y > (self->lastContentScrollOffset + scrollThreshold)) {
+                    self->scrollDirection = -1;
+                    self->lastContentScrollOffset = y;
+                }
+                // scrolling up
+                else if (y < (self->lastContentScrollOffset - scrollThreshold)) {
+                    self->scrollDirection = 1;
+                    self->lastContentScrollOffset = y;
+                }
             }
         }
         /* Hourglass custom end */
